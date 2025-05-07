@@ -11,6 +11,7 @@ import './globals.css';
 import './theme.css';
 import { UserProvider } from '@/contexts/user-context';
 import { ProjectProvider } from '@/contexts/project-context';
+import Header from '@/components/layout/header';
 
 const META_THEME_COLORS = {
   light: '#ffffff',
@@ -71,6 +72,7 @@ export default async function RootLayout({
               <UserProvider>
                 <ProjectProvider>
                   <Toaster />
+                  <Header />
                   {children}
                 </ProjectProvider>
               </UserProvider>
