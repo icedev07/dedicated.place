@@ -10,9 +10,6 @@ export const metadata: Metadata = {
 export default async function Page() {
   return (
     <div>
-      <div className='flex justify-end p-4'>
-        <ModeToggle />
-      </div>
       <SignInViewPage />
     </div>
   );

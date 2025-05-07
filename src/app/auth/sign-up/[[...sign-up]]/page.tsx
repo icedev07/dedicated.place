@@ -20,9 +20,6 @@ export default async function Page(props: { searchParams: Promise<Message> }) {
 
   return (
     <div>
-      <div className='flex justify-end p-4'>
-        <ModeToggle />
-      </div>
       <SignUpViewPage />
     </div>
   );
