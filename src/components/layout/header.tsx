@@ -20,7 +20,7 @@ export default function Header() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-6">
-          <Link href="/" className={`flex items-center gap-1 ${pathname === '/' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+          <Link href="/home" className={`flex items-center gap-1 ${pathname === '/' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
             <Home className="w-5 h-5" /> Home
           </Link>
           <Link href="/providers" className={`flex items-center gap-1 ${pathname.startsWith('/providers') ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
