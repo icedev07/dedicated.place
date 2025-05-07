@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Users, ShieldCheck, UserCircle, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/layout/ThemeToggle/theme-toggle';
 
 export default function Header() {
   const pathname = usePathname();
@@ -30,13 +31,9 @@ export default function Header() {
           </Link>
         </nav>
 
-        {/* Right side: Language switcher & user */}
+        {/* Right side: Theme toggle & user */}
         <div className="flex items-center gap-4">
-          {/* Language Switcher */}
-          <Button variant="ghost" size="icon" aria-label="Switch Language">
-            <Globe className="w-5 h-5" />
-          </Button>
-          {/* User/Profile */}
+          <ModeToggle />
           <Button variant="ghost" size="icon" aria-label="User Profile">
             <UserCircle className="w-6 h-6" />
           </Button>
