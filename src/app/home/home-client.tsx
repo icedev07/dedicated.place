@@ -3,6 +3,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { MapPin, CreditCard } from 'lucide-react';
 import { useState } from 'react';
 
 interface Object {
@@ -37,37 +38,43 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredObjects?.map((object) => (
-          <Card key={object.id}>
-            <CardHeader>
-              <CardTitle>{object.title_de}</CardTitle>
-              {object.image_urls && object.image_urls.length > 0 && (
-                <img 
-                  src={object.image_urls}
-                  alt={object.title_de}
-                  className="w-full h-48 object-cover rounded-md mt-2"
-                />
-              )}
-              <CardDescription>{object.description_de}</CardDescription>
-              
-              <div className="flex gap-2 mt-4">
-                <Button
-                  variant="default"
-                  onClick={() => window.open(`https://www.google.com/maps?q=${object.latitude},${object.longitude}`, '_blank')}
-                >
-                  View on Map
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => window.open(`/payment/${object.id}`, '_blank')}
-                >
-                  Make Payment
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
-        ))}
+      <div className="h-[calc(100vh-12rem)] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredObjects?.map((object) => (
+            <Card key={object.id}>
+              <CardHeader>
+                <CardTitle>{object.title_de}</CardTitle>
+                {object.image_urls && object.image_urls.length > 0 && (
+                  <img 
+                    src={object.image_urls}
+                    alt={object.title_de}
+                    className="w-full h-48 object-cover rounded-md mt-2"
+                  />
+                )}
+                <CardDescription>{object.description_de}</CardDescription>
+                
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(`https://www.google.com/maps?q=${object.latitude},${object.longitude}`, '_blank')}
+                    className="flex items-center gap-2"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    View on Map
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => window.open(`/payment/${object.id}`, '_blank')}
+                    className="flex items-center gap-2"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Make Payment
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
