@@ -1,15 +1,4 @@
-<div align="center"><strong>Next.js Admin Dashboard With Shadcn-ui</strong></div>
-<div align="center">Built with the Next.js 15 App Router</div>
-<br />
-<div align="center">
-<a href="https://supabase-next-test-seven.vercel.app/">View Demo</a>
-<span>
-</div>
-
 ## Overview
-
-This is a test assessment using the following stack:
-
 - Framework - [Next.js 15](https://nextjs.org/13)
 - Language - [TypeScript](https://www.typescriptlang.org)
 - Styling - [Tailwind CSS v4](https://tailwindcss.com)
@@ -29,4 +18,3 @@ This is a test assessment using the following stack:
 > [!NOTE]  
 > Use **Node veriosn is 22(LTS)**
 > Use **Next 15** with **React 19** 
->
