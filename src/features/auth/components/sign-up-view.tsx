@@ -179,16 +179,16 @@ export default function SignUpViewPage() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem
-                            value={Roles.client}
+                            value={Roles.provider}
                             className='capitalize'
                           >
-                            {Roles.client}
+                            {Roles.provider}
                           </SelectItem>
                           <SelectItem
-                            value={Roles.designer}
+                            value={Roles.guardian}
                             className='capitalize'
                           >
-                            {Roles.designer}
+                            {Roles.guardian}
                           </SelectItem>
                         </SelectContent>
                       </Select>

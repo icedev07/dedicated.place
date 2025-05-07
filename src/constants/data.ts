@@ -86,8 +86,8 @@ export const recentSalesData: SaleUser[] = [
 ];
 
 export const Roles = {
-  designer: 'designer',
-  client: 'client',
+  provider: 'provider',
+  guardian: 'guardian',
   admin: 'admin'
 };
 
