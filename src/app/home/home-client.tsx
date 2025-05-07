@@ -29,13 +29,13 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
   return (
     <div>
       <div className="relative bg-background border-b border-border">
-        <div className="container mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-12">
+        <div className="container mx-auto px-6 py-8 flex flex-col md:flex-row items-center gap-12">
           {/* Hero Image */}
           <div className="w-full md:w-1/2">
             <img 
               src="/hero-image.png" 
               alt="Dedicate Place Hero"
-              className="rounded-lg shadow-xl h-full h-auto object-cover mx-auto"
+              className="rounded-lg shadow-xl h-[300px] md:h-[400px] object-cover mx-auto mt-4"
             />
           </div>
 
@@ -47,14 +47,14 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
             <p className="text-xl text-muted-foreground">
               Dedicate a special place to honor your loved ones or commemorate important moments. Our platform helps you create meaningful connections between memories and locations.
             </p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <Button size="lg">
                 Get Started
               </Button>
               <Button variant="outline" size="lg">
                 Learn More
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -69,43 +69,41 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
           />
         </div>
 
-        <div className="h-[calc(100vh-12rem)] overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredObjects?.map((object) => (
-              <Card key={object.id}>
-                <CardHeader>
-                  <CardTitle>{object.title_de}</CardTitle>
-                  {object.image_urls && object.image_urls.length > 0 && (
-                    <img 
-                      src={object.image_urls}
-                      alt={object.title_de}
-                      className="w-full h-48 object-cover rounded-md mt-2"
-                    />
-                  )}
-                  <CardDescription>{object.description_de}</CardDescription>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => window.open(`https://www.google.com/maps?q=${object.latitude},${object.longitude}`, '_blank')}
-                      className="flex items-center gap-2"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      View on Map
-                    </Button>
-                    <Button
-                      variant="default"
-                      onClick={() => window.open(`/payment/${object.id}`, '_blank')}
-                      className="flex items-center gap-2"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      Make Payment
-                    </Button>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredObjects?.map((object) => (
+            <Card key={object.id}>
+              <CardHeader>
+                <CardTitle>{object.title_de}</CardTitle>
+                {object.image_urls && object.image_urls.length > 0 && (
+                  <img 
+                    src={object.image_urls}
+                    alt={object.title_de}
+                    className="w-full h-48 object-cover rounded-md mt-2"
+                  />
+                )}
+                <CardDescription>{object.description_de}</CardDescription>
+                
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(`https://www.google.com/maps?q=${object.latitude},${object.longitude}`, '_blank')}
+                    className="flex items-center gap-2"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    View on Map
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => window.open(`/payment/${object.id}`, '_blank')}
+                    className="flex items-center gap-2"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Make Payment
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
