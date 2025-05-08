@@ -53,7 +53,7 @@ export default function SignInViewPage() {
     await signInAction({ email: data.email, password: data.password });
     await getCurrentUser();
     setLoading(false);
-    router.push('/dashboard');
+    router.push('/home');
   };
 
   return (
