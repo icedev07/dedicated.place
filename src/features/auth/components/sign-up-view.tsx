@@ -53,7 +53,7 @@ export default function SignUpViewPage() {
     password: '',
     first_name: '',
     last_name: '',
-    role: Roles.designer
+    role: Roles.provider
   };
 
   const form = useForm<UserSignUpFormValue>({

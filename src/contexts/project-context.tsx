@@ -60,7 +60,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({
             .order('created_at', { ascending: false });
           if (error) throw error;
           setProjects(data);
-        } else if (user.user_metadata.role === Roles.client) {
+        } else if (user.user_metadata.role === Roles.provider) {
           const { data, error } = await supabase
             .from('projects')
             .select()
@@ -68,7 +68,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({
             .order('created_at', { ascending: false });
           if (error) throw error;
           setProjects(data);
-        } else if (user.user_metadata.role === Roles.designer) {
+        } else if (user.user_metadata.role === Roles.provider) {
           const { data, error } = await supabase
             .from('projects')
             .select()

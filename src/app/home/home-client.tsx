@@ -12,7 +12,7 @@ interface Object {
   description_de: string;
   latitude: number;
   longitude: number;
-  image_urls?: string[];
+  image_urls?: string;
 }
 
 export default function HomeClient({ objects }: { objects: Object[] }) {

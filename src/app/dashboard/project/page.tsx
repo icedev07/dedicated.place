@@ -46,7 +46,7 @@ export default async function Page(props: pageProps) {
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
           <Heading title='Projects' description='Manage projects' />
-          {user?.user_metadata.role !== Roles.designer && (
+          {user?.user_metadata.role !== Roles.provider && (
             <Link
               href='/dashboard/project/new'
               className={cn(buttonVariants(), 'text-xs md:text-sm')}

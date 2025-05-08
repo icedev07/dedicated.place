@@ -29,7 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
 
   const isDeveloper = useMemo(
-    () => currentUser?.user_metadata.role === Roles.designer,
+    () => currentUser?.user_metadata.role === Roles.provider,
     [currentUser]
   );
 

@@ -30,7 +30,7 @@ const formSchema = z.object({
 const defaultValues = {
   first_name: '',
   last_name: '',
-  role: Roles.designer
+  role: Roles.provider
 };
 
 export type ProfileFormValue = z.infer<typeof formSchema>;
@@ -134,7 +134,7 @@ export default function UserListPage({}) {
                 <FormItem>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={selectedProfile?.role || Roles.designer}
+                    defaultValue={selectedProfile?.role || Roles.provider}
                   >
                     <FormControl className='w-full'>
                       <SelectTrigger className='capitalize'>
@@ -142,11 +142,11 @@ export default function UserListPage({}) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={Roles.client} className='capitalize'>
-                        {Roles.client}
+                      <SelectItem value={Roles.provider} className='capitalize'>
+                        {Roles.provider}
                       </SelectItem>
-                      <SelectItem value={Roles.designer} className='capitalize'>
-                        {Roles.designer}
+                      <SelectItem value={Roles.provider} className='capitalize'>
+                        {Roles.provider}
                       </SelectItem>
                     </SelectContent>
                   </Select>

@@ -166,11 +166,11 @@ export default function ProjectForm({
         role: currentUser.user_metadata.role
       });
 
-    return profiles.filter((profile) => profile.role === Roles.designer);
+    return profiles.filter((profile) => profile.role === Roles.provider);
   }, [currentUser, profiles]);
 
   const isDeveloper = useMemo(
-    () => currentUser?.user_metadata.role === Roles.designer,
+    () => currentUser?.user_metadata.role === Roles.provider,
     [currentUser]
   );
 
