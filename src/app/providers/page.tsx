@@ -92,91 +92,92 @@ export default function ProvidersPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
+      <div className="relative overflow-x-auto">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-500" />
+          </div>
+        )}
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {objects.map((object) => (
+              <tr key={object.id}>
+                <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {object.created_at ? new Date(object.created_at).toLocaleDateString() : '-'}
+                </td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {objects.map((object) => (
-                <tr key={object.id}>
-                  <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {object.created_at ? new Date(object.created_at).toLocaleDateString() : '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
 
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border rounded px-2 py-1"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center">
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              First
+            </button>
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            {getVisiblePageNumbers().map((pageNum) => (
               <button
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-1 border rounded ${page === pageNum ? 'bg-blue-500 text-white' : ''}`}
               >
-                First
+                {pageNum}
               </button>
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              {getVisiblePageNumbers().map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className={`px-3 py-1 border rounded ${page === pageNum ? 'bg-blue-500 text-white' : ''}`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-              <button
-                onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Last
-              </button>
-            </div>
+            ))}
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+            <button
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Last
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
