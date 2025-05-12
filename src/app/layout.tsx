@@ -69,13 +69,13 @@ export default async function RootLayout({
             enableColorScheme
           >
             <Providers activeThemeValue={activeThemeValue as string}>
-              <UserProvider>
-                <ProjectProvider>
+              {/* <UserProvider>
+                <ProjectProvider> */}
                   <Toaster />
                   <Header />
                   {children}
-                </ProjectProvider>
-              </UserProvider>
+                {/* </ProjectProvider>
+              </UserProvider> */}
             </Providers>
           </ThemeProvider>
         </NuqsAdapter>
