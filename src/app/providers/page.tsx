@@ -3,7 +3,10 @@
 
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useDebounce } from '@/hooks/use-debounce';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 interface PublicObject {
   id: string;
@@ -19,33 +22,40 @@ export default function ProvidersPage() {
   const [objects, setObjects] = useState<PublicObject[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  const fetchObjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      const supabase = createClient();
+
+      let query = supabase
+        .from('objects')
+        .select('*', { count: 'exact' });
+
+      if (debouncedSearch) {
+        query = query.ilike('title_de', `%${debouncedSearch}%`);
+      }
+
+      const { count } = await query.range(0, 0);
+      setTotalCount(count || 0);
+
+      const { data } = await query
+        .range((page - 1) * rowsPerPage, page * rowsPerPage - 1);
+
+      setObjects(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+      setObjects([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rowsPerPage, debouncedSearch]);
 
   useEffect(() => {
-    const fetchObjects = async () => {
-      try {
-        const supabase = createClient();
-        const { count } = await supabase
-          .from('objects')
-          .select('*', { count: 'exact', head: true });
-
-        setTotalCount(count || 0);
-
-        const { data } = await supabase
-          .from('objects')
-          .select('*')
-          .range((page - 1) * rowsPerPage, page * rowsPerPage - 1);
-
-        setObjects(data || []);
-      } catch (error) {
-        console.error('Error:', error);
-        setObjects([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchObjects();
-  }, [page, rowsPerPage]);
+  }, [fetchObjects]);
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -62,96 +72,112 @@ export default function ProvidersPage() {
     return pageNumbers.slice(start - 1, end);
   };
 
-  console.log('objects', objects);
-
   return (
     <div className="container mx-auto py-16">
       <h1 className="text-3xl font-bold mb-4">Public Objects</h1>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {objects.map((object) => (
-                <tr key={object.id}>
-                  <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {object.created_at ? new Date(object.created_at).toLocaleDateString() : '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search by title..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            className="pl-10 w-full max-w-md"
+          />
+        </div>
+      </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border rounded px-2 py-1"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
+      <div className="relative overflow-x-auto">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-500" />
+          </div>
+        )}
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {objects.map((object) => (
+              <tr key={object.id}>
+                <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {object.created_at ? new Date(object.created_at).toLocaleDateString() : '-'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center">
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              First
+            </button>
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            {getVisiblePageNumbers().map((pageNum) => (
               <button
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-1 border rounded ${page === pageNum ? 'bg-blue-500 text-white' : ''}`}
               >
-                First
+                {pageNum}
               </button>
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              {getVisiblePageNumbers().map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className={`px-3 py-1 border rounded ${page === pageNum ? 'bg-blue-500 text-white' : ''}`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-              <button
-                onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Last
-              </button>
-            </div>
+            ))}
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+            <button
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Last
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
