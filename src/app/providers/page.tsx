@@ -1,19 +1,16 @@
-// src/app/providers/page.tsx
 'use client';
 
-import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-
-interface PublicObject {
-  id: string;
-  title_de: string;
-  description_de: string;
-  created_at: string;
-}
+import { ObjectsTable } from '@/components/objects/ObjectsTable';
+import { ObjectsPagination } from '@/components/objects/ObjectsPagination';
+import { DeleteDialog } from '@/components/objects/DeleteDialog';
+import { SuccessAlert } from '@/components/objects/SuccessAlert';
+import { PublicObject } from '@/types/public-object';
 
 export default function ProvidersPage() {
   const router = useRouter();
@@ -24,6 +21,9 @@ export default function ProvidersPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const fetchObjects = useCallback(async () => {
     try {
@@ -46,7 +46,6 @@ export default function ProvidersPage() {
 
       setObjects(data || []);
     } catch (error) {
-      console.error('Error:', error);
       setObjects([]);
     } finally {
       setLoading(false);
@@ -60,7 +59,6 @@ export default function ProvidersPage() {
   const totalPages = Math.ceil(totalCount / rowsPerPage);
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
   const maxVisiblePages = 5;
-  
   const getVisiblePageNumbers = () => {
     if (totalPages <= maxVisiblePages) return pageNumbers;
     const halfMax = Math.floor(maxVisiblePages / 2);
@@ -75,7 +73,6 @@ export default function ProvidersPage() {
   return (
     <div className="container mx-auto py-16">
       <h1 className="text-3xl font-bold mb-4">Public Objects</h1>
-      
       <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -91,93 +88,35 @@ export default function ProvidersPage() {
           />
         </div>
       </div>
-
-      <div className="relative overflow-x-auto">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-500" />
-          </div>
-        )}
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {objects.map((object) => (
-              <tr key={object.id}>
-                <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {object.created_at ? new Date(object.created_at).toLocaleDateString() : '-'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center">
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setPage(1);
-              }}
-              className="border rounded px-2 py-1"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setPage(1)}
-              disabled={page === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              First
-            </button>
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            {getVisiblePageNumbers().map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => setPage(pageNum)}
-                className={`px-3 py-1 border rounded ${page === pageNum ? 'bg-blue-500 text-white' : ''}`}
-              >
-                {pageNum}
-              </button>
-            ))}
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page === totalPages}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-            <button
-              onClick={() => setPage(totalPages)}
-              disabled={page === totalPages}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Last
-            </button>
-          </div>
-        </div>
-      </div>
+      {success && <SuccessAlert message={success} onClose={() => setSuccess(null)} />}
+      <ObjectsTable
+        objects={objects}
+        loading={loading}
+        onEdit={id => router.push(`/providers/${id}`)}
+        onDelete={id => setDeleteId(id)}
+      />
+      <ObjectsPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={setRowsPerPage}
+        getVisiblePageNumbers={getVisiblePageNumbers}
+      />
+      <DeleteDialog
+        open={!!deleteId}
+        loading={deleteLoading}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={async () => {
+          setDeleteLoading(true);
+          const supabase = createClient();
+          await supabase.from("objects").delete().eq("id", deleteId!);
+          setDeleteLoading(false);
+          setDeleteId(null);
+          setSuccess("Object deleted successfully.");
+          fetchObjects();
+        }}
+      />
     </div>
   );
 }
