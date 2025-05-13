@@ -4,3 +4,4 @@ export interface PublicObject {
   description_de: string;
   created_at: string;
 }
+ 

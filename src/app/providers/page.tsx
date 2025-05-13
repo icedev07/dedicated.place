@@ -5,12 +5,13 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { ObjectsTable } from '@/components/objects/ObjectsTable';
 import { ObjectsPagination } from '@/components/objects/ObjectsPagination';
 import { DeleteDialog } from '@/components/objects/DeleteDialog';
 import { SuccessAlert } from '@/components/objects/SuccessAlert';
 import { PublicObject } from '@/types/public-object';
+import { Button } from '@/components/ui/button';
 
 export default function ProvidersPage() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function ProvidersPage() {
   return (
     <div className="container mx-auto py-16">
       <h1 className="text-3xl font-bold mb-4">Public Objects</h1>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
@@ -87,6 +88,10 @@ export default function ProvidersPage() {
             className="pl-10 w-full max-w-md"
           />
         </div>
+        <Button onClick={() => router.push('/providers/new')} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Create Object
+        </Button>
       </div>
       {success && <SuccessAlert message={success} onClose={() => setSuccess(null)} />}
       <ObjectsTable
