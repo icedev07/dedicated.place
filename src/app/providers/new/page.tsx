@@ -1,15 +1,11 @@
-"use client";
+'use client';
 
-import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -30,10 +30,8 @@ const statusOptions = [
   { value: "unavailable", label: "Unavailable" },
 ];
 
-export default function ObjectDetailPage() {
+export default function NewObjectPage() {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
   const [form, setForm] = useState({
     title_de: "",
     title_en: "",
@@ -54,45 +52,10 @@ export default function ObjectDetailPage() {
     share_url: "",
     map_url: "",
   });
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchObject = async () => {
-      setLoading(true);
-      const supabase = createClient();
-      const { data } = await supabase.from("objects").select("*").eq("id", id).single();
-      if (data) {
-        setForm({
-          title_de: data.title_de || "",
-          title_en: data.title_en || "",
-          description_d: data.description_d || "",
-          description_e: data.description_e || "",
-          type: data.type?.value || "bench",
-          custom_type: data.custom_type || "",
-          special_tag: data.special_tag || "",
-          image_urls: data.image_urls || "",
-          location_text: data.location_text || "",
-          latitude: data.latitude?.toString() || "",
-          longitude: data.longitude?.toString() || "",
-          price: data.price?.toString() || "",
-          plaque_allow: !!data.plaque_allow,
-          plaque_max_chars: data.plaque_max_chars?.toString() || "",
-          status: data.status?.value || "available",
-          booking_url: data.booking_url || "",
-          share_url: data.share_url || "",
-          map_url: data.map_url || "",
-        });
-        if (data.image_urls) setImagePreview(data.image_urls);
-      }
-      setLoading(false);
-    };
-    fetchObject();
-  }, [id]);
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -121,7 +84,7 @@ export default function ObjectDetailPage() {
       setSaving(true);
       setError(null);
       const supabase = createClient();
-      const updateData = {
+      const insertData = {
         ...form,
         latitude: form.latitude ? parseFloat(form.latitude) : null,
         longitude: form.longitude ? parseFloat(form.longitude) : null,
@@ -130,33 +93,20 @@ export default function ObjectDetailPage() {
         type: { value: form.type },
         status: { value: form.status },
       };
-      const { error: updateError } = await supabase.from("objects").update(updateData).eq("id", id);
-      if (updateError) throw updateError;
-      setSuccess(true);
+      const { error: insertError } = await supabase.from("objects").insert([insertData]);
+      if (insertError) throw insertError;
+      router.push("/providers");
     } catch (err) {
-      setError("Failed to update object. Please try again.");
+      setError("Failed to create object. Please try again.");
     } finally {
       setSaving(false);
       setShowConfirmDialog(false);
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-blue-500" />
-      </div>
-    );
-
   return (
     <div className="container mx-auto py-16 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Edit Object</h1>
-      {success && (
-        <Alert className="mb-4">
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>Object updated successfully.</AlertDescription>
-        </Alert>
-      )}
+      <h1 className="text-3xl font-bold mb-8">Create Object</h1>
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Error</AlertTitle>
@@ -283,9 +233,9 @@ export default function ObjectDetailPage() {
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Update</DialogTitle>
+            <DialogTitle>Confirm Creation</DialogTitle>
             <DialogDescription>
-              Are you sure you want to update this object? This action cannot be undone.
+              Are you sure you want to create this object? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -296,10 +246,10 @@ export default function ObjectDetailPage() {
               {saving ? (
                 <>
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                  Saving...
+                  Creating...
                 </>
               ) : (
-                "Update"
+                "Create"
               )}
             </Button>
           </DialogFooter>
@@ -307,4 +257,4 @@ export default function ObjectDetailPage() {
       </Dialog>
     </div>
   );
-}
+} 
