@@ -38,17 +38,17 @@ export default function ObjectDetailPage() {
   const [form, setForm] = useState({
     title_de: "",
     title_en: "",
-    description_d: "",
-    description_e: "",
+    description_de: "",
+    description_en: "",
     type: "bench",
-    custom_type: "",
+    custom_type_name: "",
     special_tag: "",
     image_urls: "",
     location_text: "",
     latitude: "",
     longitude: "",
     price: "",
-    plaque_allow: false,
+    plaque_allowed: false,
     plaque_max_chars: "",
     status: "available",
     booking_url: "",
@@ -71,17 +71,17 @@ export default function ObjectDetailPage() {
         setForm({
           title_de: data.title_de || "",
           title_en: data.title_en || "",
-          description_d: data.description_d || "",
-          description_e: data.description_e || "",
+          description_de: data.description_de || "",
+          description_en: data.description_en || "",
           type: data.type?.value || "bench",
-          custom_type: data.custom_type || "",
+          custom_type_name: data.custom_type_name || "",
           special_tag: data.special_tag || "",
           image_urls: data.image_urls || "",
           location_text: data.location_text || "",
           latitude: data.latitude?.toString() || "",
           longitude: data.longitude?.toString() || "",
           price: data.price?.toString() || "",
-          plaque_allow: !!data.plaque_allow,
+          plaque_allowed: !!data.plaque_allowed,
           plaque_max_chars: data.plaque_max_chars?.toString() || "",
           status: data.status?.value || "available",
           booking_url: data.booking_url || "",
@@ -178,12 +178,12 @@ export default function ObjectDetailPage() {
             <Input id="title_en" name="title_en" value={form.title_en} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="description_d">Description (German)</Label>
-            <Textarea id="description_d" name="description_d" value={form.description_d} onChange={handleChange} />
+            <Label htmlFor="description_de">Description (German)</Label>
+            <Textarea id="description_de" name="description_de" value={form.description_de} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="description_e">Description (English)</Label>
-            <Textarea id="description_e" name="description_e" value={form.description_e} onChange={handleChange} />
+            <Label htmlFor="description_en">Description (English)</Label>
+            <Textarea id="description_en" name="description_en" value={form.description_en} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="type">Type</Label>
@@ -199,8 +199,8 @@ export default function ObjectDetailPage() {
             </Select>
           </div>
           <div>
-            <Label htmlFor="custom_type">Custom type name</Label>
-            <Input id="custom_type" name="custom_type" value={form.custom_type} onChange={handleChange} />
+            <Label htmlFor="custom_type_name">Custom type name</Label>
+            <Input id="custom_type_name" name="custom_type_name" value={form.custom_type_name} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="special_tag">Special tag</Label>
@@ -240,8 +240,8 @@ export default function ObjectDetailPage() {
             <Input id="price" name="price" value={form.price} onChange={handleChange} type="number" min="0" />
           </div>
           <div className="flex items-center gap-2">
-            <Checkbox id="plaque_allow" name="plaque_allow" checked={form.plaque_allow} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allow: !!checked }))} />
-            <Label htmlFor="plaque_allow">Plaque allowed</Label>
+            <Checkbox id="plaque_allowed" name="plaque_allowed" checked={form.plaque_allowed} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allowed: !!checked }))} />
+            <Label htmlFor="plaque_allowed">Plaque allowed</Label>
           </div>
           <div>
             <Label htmlFor="plaque_max_chars">Max. text length for dedication/plaque</Label>
