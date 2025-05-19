@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { uploadObjectImage } from '@/utils/supabase/uploadImage';
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -102,12 +103,15 @@ export default function ObjectDetailPage() {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setForm((prev) => ({ ...prev, image_urls: file.name }));
       setImagePreview(URL.createObjectURL(file));
-      // TODO: Upload to Supabase Storage and save URL
+      // Upload to Supabase Storage and get public URL
+      const url = await uploadObjectImage(file, id);
+      if (url) {
+        setForm((prev) => ({ ...prev, image_urls: url }));
+      }
     }
   };
 

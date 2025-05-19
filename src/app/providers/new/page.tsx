@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { uploadObjectImage } from '@/utils/supabase/uploadImage';
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -65,12 +66,15 @@ export default function NewObjectPage() {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setForm((prev) => ({ ...prev, image_urls: file.name }));
       setImagePreview(URL.createObjectURL(file));
-      // TODO: Upload to Supabase Storage and save URL
+      // Upload to Supabase Storage and get public URL
+      const url = await uploadObjectImage(file);
+      if (url) {
+        setForm((prev) => ({ ...prev, image_urls: url }));
+      }
     }
   };
 
