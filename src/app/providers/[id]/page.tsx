@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { uploadObjectImage } from '@/utils/supabase/uploadImage';
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -37,17 +38,17 @@ export default function ObjectDetailPage() {
   const [form, setForm] = useState({
     title_de: "",
     title_en: "",
-    description_d: "",
-    description_e: "",
+    description_de: "",
+    description_en: "",
     type: "bench",
-    custom_type: "",
+    custom_type_name: "",
     special_tag: "",
     image_urls: "",
     location_text: "",
     latitude: "",
     longitude: "",
     price: "",
-    plaque_allow: false,
+    plaque_allowed: false,
     plaque_max_chars: "",
     status: "available",
     booking_url: "",
@@ -70,17 +71,17 @@ export default function ObjectDetailPage() {
         setForm({
           title_de: data.title_de || "",
           title_en: data.title_en || "",
-          description_d: data.description_d || "",
-          description_e: data.description_e || "",
+          description_de: data.description_de || "",
+          description_en: data.description_en || "",
           type: data.type?.value || "bench",
-          custom_type: data.custom_type || "",
+          custom_type_name: data.custom_type_name || "",
           special_tag: data.special_tag || "",
           image_urls: data.image_urls || "",
           location_text: data.location_text || "",
           latitude: data.latitude?.toString() || "",
           longitude: data.longitude?.toString() || "",
           price: data.price?.toString() || "",
-          plaque_allow: !!data.plaque_allow,
+          plaque_allowed: !!data.plaque_allowed,
           plaque_max_chars: data.plaque_max_chars?.toString() || "",
           status: data.status?.value || "available",
           booking_url: data.booking_url || "",
@@ -102,12 +103,26 @@ export default function ObjectDetailPage() {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setForm((prev) => ({ ...prev, image_urls: file.name }));
-      setImagePreview(URL.createObjectURL(file));
-      // TODO: Upload to Supabase Storage and save URL
+      try {
+        // Show loading state
+        setImagePreview(URL.createObjectURL(file));
+        
+        // Upload to Supabase Storage and get public URL
+        const url = await uploadObjectImage(file, id);
+        if (url) {
+          // Update both the preview and the form state with the new URL
+          setForm((prev) => ({ ...prev, image_urls: url }));
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      } catch (error) {
+        // If upload fails, revert the preview and show error
+        setImagePreview(form.image_urls || null);
+        setError('Failed to upload image. Please try again.');
+      }
     }
   };
 
@@ -174,12 +189,12 @@ export default function ObjectDetailPage() {
             <Input id="title_en" name="title_en" value={form.title_en} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="description_d">Description (German)</Label>
-            <Textarea id="description_d" name="description_d" value={form.description_d} onChange={handleChange} />
+            <Label htmlFor="description_de">Description (German)</Label>
+            <Textarea id="description_de" name="description_de" value={form.description_de} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="description_e">Description (English)</Label>
-            <Textarea id="description_e" name="description_e" value={form.description_e} onChange={handleChange} />
+            <Label htmlFor="description_en">Description (English)</Label>
+            <Textarea id="description_en" name="description_en" value={form.description_en} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="type">Type</Label>
@@ -195,8 +210,8 @@ export default function ObjectDetailPage() {
             </Select>
           </div>
           <div>
-            <Label htmlFor="custom_type">Custom type name</Label>
-            <Input id="custom_type" name="custom_type" value={form.custom_type} onChange={handleChange} />
+            <Label htmlFor="custom_type_name">Custom type name</Label>
+            <Input id="custom_type_name" name="custom_type_name" value={form.custom_type_name} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="special_tag">Special tag</Label>
@@ -221,12 +236,37 @@ export default function ObjectDetailPage() {
           <div>
             <Label>Image upload</Label>
             <div className="flex items-center gap-4">
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="image-upload" />
-              <label htmlFor="image-upload" className="w-32 h-32 border flex items-center justify-center cursor-pointer bg-gray-50 rounded">
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageChange} 
+                className="hidden" 
+                id="image-upload" 
+              />
+              <label 
+                htmlFor="image-upload" 
+                className="w-48 h-48 border-2 border-dashed flex items-center justify-center cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:bg-gray-100 transition-colors group"
+              >
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="object-cover w-full h-full rounded" />
+                  <div className="relative w-full h-full">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="object-cover w-full h-full rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
+                      <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-center p-4">
+                        <p className="font-medium">Click to change image</p>
+                        <p className="text-sm mt-1">or drag and drop</p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <span className="text-3xl">+</span>
+                  <div className="flex flex-col items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors">
+                    <span className="text-4xl mb-2">+</span>
+                    <span className="text-sm">Click to upload</span>
+                    <span className="text-xs mt-1">or drag and drop</span>
+                  </div>
                 )}
               </label>
             </div>
@@ -236,8 +276,8 @@ export default function ObjectDetailPage() {
             <Input id="price" name="price" value={form.price} onChange={handleChange} type="number" min="0" />
           </div>
           <div className="flex items-center gap-2">
-            <Checkbox id="plaque_allow" name="plaque_allow" checked={form.plaque_allow} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allow: !!checked }))} />
-            <Label htmlFor="plaque_allow">Plaque allowed</Label>
+            <Checkbox id="plaque_allowed" name="plaque_allowed" checked={form.plaque_allowed} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allowed: !!checked }))} />
+            <Label htmlFor="plaque_allowed">Plaque allowed</Label>
           </div>
           <div>
             <Label htmlFor="plaque_max_chars">Max. text length for dedication/plaque</Label>

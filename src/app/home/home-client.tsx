@@ -42,10 +42,10 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
           {/* Hero Text */}
           <div className="w-full md:w-1/2 space-y-6">
             <h1 className="text-4xl md:text-5xl font-bold text-primary">
-              Create Lasting Memories
+              Widme, was dir wichtig ist.
             </h1>
             <p className="text-xl text-muted-foreground">
-              Dedicate a special place to honor your loved ones or commemorate important moments. Our platform helps you create meaningful connections between memories and locations.
+             Mit deinepatenschaft.de verwalten Städte, Parks, Stiftungen und Zoos ganz einfach Patenschaften für Bänke, Bäume, Beete, Tiere und andere Objekte – digital, effizient, DSGVO-konform und kinderleicht in der Anwendung.
             </p>
             {/* <div className="flex gap-4">
               <Button size="lg">
