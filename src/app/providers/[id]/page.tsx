@@ -106,11 +106,22 @@ export default function ObjectDetailPage() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImagePreview(URL.createObjectURL(file));
-      // Upload to Supabase Storage and get public URL
-      const url = await uploadObjectImage(file, id);
-      if (url) {
-        setForm((prev) => ({ ...prev, image_urls: url }));
+      try {
+        // Show loading state
+        setImagePreview(URL.createObjectURL(file));
+        
+        // Upload to Supabase Storage and get public URL
+        const url = await uploadObjectImage(file, id);
+        if (url) {
+          // Update both the preview and the form state with the new URL
+          setForm((prev) => ({ ...prev, image_urls: url }));
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      } catch (error) {
+        // If upload fails, revert the preview and show error
+        setImagePreview(form.image_urls || null);
+        setError('Failed to upload image. Please try again.');
       }
     }
   };
