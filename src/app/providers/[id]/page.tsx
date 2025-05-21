@@ -254,7 +254,7 @@ export default function ObjectDetailPage() {
                       alt="Preview" 
                       className="object-cover w-full h-full rounded-lg"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
                       <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-center p-4">
                         <p className="font-medium">Click to change image</p>
                         <p className="text-sm mt-1">or drag and drop</p>
