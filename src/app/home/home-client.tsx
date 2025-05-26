@@ -36,6 +36,7 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
               src="/hero-image.png" 
               alt="Dedicate Place Hero"
               className="rounded-lg shadow-xl h-[300px] md:h-[400px] object-cover mx-auto mt-4"
+              suppressHydrationWarning
             />
           </div>
 
@@ -79,6 +80,7 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
                     src={object.image_urls}
                     alt={object.title_de}
                     className="w-full h-48 object-cover rounded-md mt-2"
+                    suppressHydrationWarning
                   />
                 )}
                 <CardDescription>{object.description_de}</CardDescription>
