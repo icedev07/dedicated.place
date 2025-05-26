@@ -243,9 +243,13 @@ export default function ObjectDetailPage() {
                 className="hidden" 
                 id="image-upload" 
               />
-              <label 
+              {/* <label 
                 htmlFor="image-upload" 
                 className="w-48 h-48 border-2 border-dashed flex items-center justify-center cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:bg-gray-100 transition-colors group"
+              > */}
+              <label 
+                htmlFor="image-upload" 
+                className="border-2 border-dashed flex items-center justify-center cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:bg-gray-100 transition-colors group"
               >
                 {imagePreview ? (
                   <div className="relative w-full h-full">
