@@ -8,12 +8,12 @@ export default async function AdminDashboard() {
   // Fetch statistics
   const [
     { count: usersCount },
-    { count: providersCount },
+    // { count: providersCount },
     { count: objectsCount },
     { count: reportsCount }
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('providers').select('*', { count: 'exact', head: true }),
+    // supabase.from('providers').select('*', { count: 'exact', head: true }),
     supabase.from('objects').select('*', { count: 'exact', head: true }),
     supabase.from('guardian_reports').select('*', { count: 'exact', head: true })
   ]);
@@ -25,12 +25,12 @@ export default async function AdminDashboard() {
       icon: Users,
       description: 'Registered users'
     },
-    {
-      title: 'Providers',
-      value: providersCount || 0,
-      icon: Building2,
-      description: 'Active providers'
-    },
+    // {
+    //   title: 'Providers',
+    //   value: providersCount || 0,
+    //   icon: Building2,
+    //   description: 'Active providers'
+    // },
     {
       title: 'Objects',
       value: objectsCount || 0,
