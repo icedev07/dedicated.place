@@ -23,8 +23,8 @@ const navigation = [
     icon: Users
   },
   {
-    name: 'Providers',
-    href: '/admin/providers',
+    name: 'Objects',
+    href: '/admin/objects',
     icon: Building2
   },
   {
