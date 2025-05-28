@@ -1,6 +1,42 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Create profiles table
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    -- Common fields for all users
+    first_name TEXT,
+    last_name TEXT,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'provider', 'guardian')),
+    email TEXT NOT NULL,
+    phone TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Provider specific fields
+    company_name TEXT,
+    company_address TEXT,
+    company_website TEXT,
+    company_logo TEXT,
+    company_description TEXT,
+    company_contact_email TEXT,
+    company_contact_phone TEXT,
+    
+    -- Guardian specific fields
+    guardian_region TEXT,
+    guardian_status TEXT CHECK (guardian_status IN ('active', 'inactive', 'pending')),
+    guardian_notes TEXT,
+    guardian_rating DECIMAL(3,2),
+    guardian_reports_count INTEGER DEFAULT 0,
+    
+    -- Admin specific fields
+    admin_level TEXT CHECK (admin_level IN ('super', 'regular')),
+    admin_permissions TEXT[] DEFAULT '{}',
+    last_login TIMESTAMPTZ
+);
+
+
 -- Create regions table
 CREATE TABLE IF NOT EXISTS public.regions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -55,19 +91,10 @@ CREATE TABLE IF NOT EXISTS public.guardian_reports (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable Row Level Security
+-- Enable Row Level Security for other tables
 ALTER TABLE public.regions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.objects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.guardian_reports ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Anyone can view regions" ON public.regions;
-DROP POLICY IF EXISTS "Only admins and providers can modify regions" ON public.regions;
-DROP POLICY IF EXISTS "Anyone can view objects" ON public.objects;
-DROP POLICY IF EXISTS "Only admins and providers can modify objects" ON public.objects;
-DROP POLICY IF EXISTS "Anyone can view guardian reports" ON public.guardian_reports;
-DROP POLICY IF EXISTS "Guardians can create reports" ON public.guardian_reports;
-DROP POLICY IF EXISTS "Guardians can update their own reports" ON public.guardian_reports;
 
 -- RLS Policies for regions
 CREATE POLICY "Anyone can view regions"
@@ -77,8 +104,10 @@ CREATE POLICY "Anyone can view regions"
 CREATE POLICY "Only admins and providers can modify regions"
     ON public.regions FOR ALL
     USING (
-        auth.jwt() ->> 'role' = 'admin' OR
-        (auth.jwt() ->> 'role' = 'provider' AND provider_id = auth.uid())
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() AND role IN ('admin', 'provider')
+        )
     );
 
 -- RLS Policies for objects
@@ -89,8 +118,10 @@ CREATE POLICY "Anyone can view objects"
 CREATE POLICY "Only admins and providers can modify objects"
     ON public.objects FOR ALL
     USING (
-        auth.jwt() ->> 'role' = 'admin' OR
-        (auth.jwt() ->> 'role' = 'provider' AND provider_id = auth.uid())
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() AND role IN ('admin', 'provider')
+        )
     );
 
 -- RLS Policies for guardian_reports
@@ -100,7 +131,12 @@ CREATE POLICY "Anyone can view guardian reports"
 
 CREATE POLICY "Guardians can create reports"
     ON public.guardian_reports FOR INSERT
-    WITH CHECK (auth.jwt() ->> 'role' = 'guardian');
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() AND role = 'guardian'
+        )
+    );
 
 CREATE POLICY "Guardians can update their own reports"
     ON public.guardian_reports FOR UPDATE
