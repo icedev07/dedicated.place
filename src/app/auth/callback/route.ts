@@ -12,7 +12,32 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data: { session }, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      return NextResponse.redirect(`${origin}/auth/sign-in?error=Invalid session`);
+    }
+
+    if (session?.user) {
+      // Fetch profile data
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profileError && profile) {
+        // Update user metadata with profile data
+        await supabase.auth.updateUser({
+          data: {
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            role: profile.role
+          }
+        });
+      }
+    }
   }
 
   if (redirectTo) {

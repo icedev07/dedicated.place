@@ -36,8 +36,9 @@ type UserFormValue = z.infer<typeof formSchema>;
 export default function SignInViewPage() {
   const router = useRouter();
   const { getCurrentUser } = useUser();
-
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
   const defaultValues = {
     email: '',
     password: ''
@@ -50,10 +51,17 @@ export default function SignInViewPage() {
 
   const onSubmit = async (data: UserFormValue) => {
     setLoading(true);
-    await signInAction({ email: data.email, password: data.password });
-    await getCurrentUser();
+    setMessage(null);
+    const result = await signInAction({ email: data.email, password: data.password });
+    
+    if (result.error) {
+      setMessage({ type: 'error', text: result.message });
+    } else {
+      setMessage({ type: 'success', text: result.message });
+      await getCurrentUser();
+      router.push('/home');
+    }
     setLoading(false);
-    router.push('/home');
   };
 
   return (
@@ -75,6 +83,13 @@ export default function SignInViewPage() {
                   Sign up
                 </Link>
               </p>
+              {message && (
+                <div className={`mt-4 p-3 rounded-md ${
+                  message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                }`}>
+                  {message.text}
+                </div>
+              )}
               <div className='mt-8 flex flex-col gap-2 [&>input]:mb-3'>
                 <FormField
                   control={form.control}
