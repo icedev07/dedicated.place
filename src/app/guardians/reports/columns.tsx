@@ -11,8 +11,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+
+interface ReportActionsProps {
+  report: GuardianReport;
+}
+
+function ReportActions({ report }: ReportActionsProps) {
+  const router = useRouter();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => router.push(`/guardians/reports/${report.id}/edit`)}
+        >
+          Edit
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export const columns: ColumnDef<GuardianReport>[] = [
   {
@@ -67,27 +93,7 @@ export const columns: ColumnDef<GuardianReport>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const router = useRouter();
-      const report = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => router.push(`/guardians/reports/${report.id}/edit`)}
-            >
-              Edit
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ReportActions report={row.original} />;
     },
   },
 ]; 
