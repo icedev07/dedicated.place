@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { uploadObjectImage } from '@/utils/supabase/uploadImage';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -43,7 +43,7 @@ export default function ObjectDetailPage() {
     type: "bench",
     custom_type_name: "",
     special_tag: "",
-    image_urls: "",
+    image_urls: [] as string[],
     location_text: "",
     latitude: "",
     longitude: "",
@@ -57,11 +57,9 @@ export default function ObjectDetailPage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchObject = async () => {
@@ -77,7 +75,7 @@ export default function ObjectDetailPage() {
           type: data.type?.value || "bench",
           custom_type_name: data.custom_type_name || "",
           special_tag: data.special_tag || "",
-          image_urls: data.image_urls || "",
+          image_urls: data.image_urls || [],
           location_text: data.location_text || "",
           latitude: data.latitude?.toString() || "",
           longitude: data.longitude?.toString() || "",
@@ -89,7 +87,6 @@ export default function ObjectDetailPage() {
           share_url: data.share_url || "",
           map_url: data.map_url || "",
         });
-        if (data.image_urls) setImagePreview(data.image_urls);
       }
       setLoading(false);
     };
@@ -102,32 +99,6 @@ export default function ObjectDetailPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        setUploadingImage(true);
-        setError(null);
-        // Create temporary preview
-        const tempPreview = URL.createObjectURL(file);
-        setImagePreview(tempPreview);
-        // Upload to Supabase Storage and get public URL
-        const url = await uploadObjectImage(file, id);
-        if (url) {
-          setForm(prev => ({ ...prev, image_urls: url }));
-          setImagePreview(url); // <-- set preview to real URL after upload
-        } else {
-          throw new Error('Failed to upload image');
-        }
-      } catch (error) {
-        setImagePreview(form.image_urls || null);
-        setError('Failed to upload image. Please try again.');
-      } finally {
-        setUploadingImage(false);
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -252,56 +223,13 @@ export default function ObjectDetailPage() {
         </div>
         <div className="space-y-4">
           <div>
-            <Label>Image upload</Label>
-            <div className="relative">
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageChange} 
-                className="hidden" 
-                id="image-upload" 
-                disabled={uploadingImage}
-              />
-              <label 
-                htmlFor="image-upload" 
-                className={`border-2 border-dashed flex items-center justify-center cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:bg-gray-100 transition-colors group ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {(form.image_urls && form.image_urls.startsWith('http')) ? (
-                  <div className="relative w-full h-48">
-                    <img 
-                      src={form.image_urls} 
-                      alt="Preview" 
-                      className="object-cover w-full h-full rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.src = '';
-                        setImagePreview(null);
-                        setForm(prev => ({ ...prev, image_urls: '' }));
-                      }}
-                    />
-                    {/* Only show overlay if image is valid */}
-                    {!uploadingImage && (
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center pointer-events-none">
-                        <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-center p-4">
-                          <p className="font-medium">Click to change image</p>
-                          <p className="text-sm mt-1">or drag and drop</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors p-8 w-full h-48 bg-black rounded-lg">
-                    <span className="text-4xl mb-2">+</span>
-                    <span className="text-sm">Click to upload</span>
-                    <span className="text-xs mt-1">or drag and drop</span>
-                  </div>
-                )}
-                {uploadingImage && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent" />
-                  </div>
-                )}
-              </label>
-            </div>
+            <Label>Images</Label>
+            <ImageUpload
+              value={form.image_urls}
+              onChange={(urls) => setForm(prev => ({ ...prev, image_urls: urls }))}
+              onRemove={(url) => setForm(prev => ({ ...prev, image_urls: prev.image_urls.filter(u => u !== url) }))}
+              folder="objects"
+            />
           </div>
           <div>
             <Label htmlFor="price">Price</Label>
@@ -342,7 +270,7 @@ export default function ObjectDetailPage() {
           </div>
         </div>
         <div className="md:col-span-2 flex gap-2 mt-8">
-          <Button type="submit" disabled={saving || uploadingImage || !imagePreview || !imagePreview.startsWith('http')}>
+          <Button type="submit" disabled={saving}>
             Save
           </Button>
           <Button type="button" variant="outline" onClick={() => router.push("/providers")}
@@ -352,6 +280,7 @@ export default function ObjectDetailPage() {
           </Button>
         </div>
       </form>
+      
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
@@ -368,7 +297,7 @@ export default function ObjectDetailPage() {
               {saving ? (
                 <>
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                  Saving...
+                  Updating...
                 </>
               ) : (
                 "Update"

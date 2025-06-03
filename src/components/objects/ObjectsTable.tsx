@@ -2,6 +2,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { PublicObject } from "@/types/public-object";
+import Image from "next/image";
 
 interface ObjectsTableProps {
   objects: PublicObject[];
@@ -21,6 +22,7 @@ export function ObjectsTable({ objects, loading, onEdit, onDelete }: ObjectsTabl
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
@@ -31,6 +33,22 @@ export function ObjectsTable({ objects, loading, onEdit, onDelete }: ObjectsTabl
         <tbody className="bg-white divide-y divide-gray-200">
           {objects.map((object) => (
             <tr key={object.id}>
+              <td className="px-6 py-4 text-sm">
+                {object.image_urls && object.image_urls.length > 0 ? (
+                  <div className="relative w-16 h-16">
+                    <Image
+                      src={object.image_urls[0]}
+                      alt={object.title_de || 'Object image'}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                    No image
+                  </div>
+                )}
+              </td>
               <td className="px-6 py-4 text-sm text-gray-500">{object.id}</td>
               <td className="px-6 py-4 text-sm text-gray-900">{object.title_de || '-'}</td>
               <td className="px-6 py-4 text-sm text-gray-500">{object.description_de || '-'}</td>
