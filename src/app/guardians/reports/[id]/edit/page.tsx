@@ -1,33 +1,30 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { ReportForm } from '../../components/report-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GuardianReport } from '@/types/guardian-report';
 import { toast } from 'sonner';
 
-interface EditReportPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditReportPage({ params }: EditReportPageProps) {
+export default function EditReportPage() {
   const [report, setReport] = useState<GuardianReport | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
+  
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   useEffect(() => {
-    if (params.id) {
+    if (id) {
       fetchReport();
     }
-  }, [params.id]);
+  }, [id]);
 
   const fetchReport = async () => {
     try {
@@ -47,7 +44,7 @@ export default function EditReportPage({ params }: EditReportPageProps) {
             title_de
           )
         `)
-        .eq('id', params.id)
+        .eq('id', id)
         .eq('guardian_id', user.id)
         .single();
 
