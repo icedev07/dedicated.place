@@ -55,6 +55,7 @@ export default function NewObjectPage() {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -66,6 +67,10 @@ export default function NewObjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirm = async () => {
     try {
       setSaving(true);
       setError(null);
@@ -207,6 +212,33 @@ export default function NewObjectPage() {
           )}
         </Button>
       </form>
+
+      {/* Confirmation dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Creation</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to create this object? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirm} disabled={saving}>
+              {saving ? (
+                <>
+                  <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
