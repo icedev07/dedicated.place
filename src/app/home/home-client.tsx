@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MapPin, CreditCard } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface Object {
   id: string;
@@ -12,7 +13,7 @@ interface Object {
   description_de: string;
   latitude: number;
   longitude: number;
-  image_urls?: string;
+  image_urls?: string[];
 }
 
 export default function HomeClient({ objects }: { objects: Object[] }) {
@@ -75,13 +76,19 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
             <Card key={object.id}>
               <CardHeader>
                 <CardTitle>{object.title_de}</CardTitle>
-                {object.image_urls && object.image_urls.length > 0 && (
-                  <img 
-                    src={object.image_urls}
-                    alt={object.title_de}
-                    className="w-full h-48 object-cover rounded-md mt-2"
-                    suppressHydrationWarning
-                  />
+                {object.image_urls && object.image_urls.length > 0 ? (
+                  <div className="relative w-full h-48 mt-2">
+                    <Image
+                      src={object.image_urls[0]}
+                      alt={object.title_de || 'Object image'}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-48 bg-gray-100 rounded-md mt-2 flex items-center justify-center text-gray-400">
+                    No image
+                  </div>
                 )}
                 <CardDescription>{object.description_de}</CardDescription>
                 

@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { uploadObjectImage } from '@/utils/supabase/uploadImage';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const typeOptions = [
   { value: "bench", label: "Bench" },
@@ -41,7 +41,7 @@ export default function NewObjectPage() {
     type: "bench",
     custom_type_name: "",
     special_tag: "",
-    image_urls: "",
+    image_urls: [] as string[],
     location_text: "",
     latitude: "",
     longitude: "",
@@ -54,10 +54,8 @@ export default function NewObjectPage() {
     map_url: "",
   });
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -65,32 +63,6 @@ export default function NewObjectPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        setUploadingImage(true);
-        setError(null);
-        // Create temporary preview
-        const tempPreview = URL.createObjectURL(file);
-        setImagePreview(tempPreview);
-        // Upload to Supabase Storage and get public URL
-        const url = await uploadObjectImage(file);
-        if (url) {
-          setForm((prev) => ({ ...prev, image_urls: url }));
-          setImagePreview(url);
-        } else {
-          throw new Error('Failed to upload image');
-        }
-      } catch (error) {
-        setImagePreview(null);
-        setError('Failed to upload image. Please try again.');
-      } finally {
-        setUploadingImage(false);
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,7 +91,6 @@ export default function NewObjectPage() {
       setError("Failed to create object. Please try again.");
     } finally {
       setSaving(false);
-      setShowConfirmDialog(false);
     }
   };
 
@@ -132,152 +103,117 @@ export default function NewObjectPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title_de">Title (German)</Label>
-            <Input id="title_de" name="title_de" value={form.title_de} onChange={handleChange} required />
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div>
+          <Label htmlFor="title_de">Title (German)</Label>
+          <Input id="title_de" name="title_de" value={form.title_de} onChange={handleChange} required />
+        </div>
+        <div>
+          <Label htmlFor="title_en">Title (English)</Label>
+          <Input id="title_en" name="title_en" value={form.title_en} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="description_de">Description (German)</Label>
+          <Textarea id="description_de" name="description_de" value={form.description_de} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="description_en">Description (English)</Label>
+          <Textarea id="description_en" name="description_en" value={form.description_en} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="type">Type</Label>
+          <Select value={form.type} onValueChange={(value) => setForm((prev) => ({ ...prev, type: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              {typeOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="custom_type_name">Custom type name</Label>
+          <Input id="custom_type_name" name="custom_type_name" value={form.custom_type_name} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="special_tag">Special tag</Label>
+          <Input id="special_tag" name="special_tag" value={form.special_tag} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="location_text">Location text</Label>
+          <Input id="location_text" name="location_text" value={form.location_text} onChange={handleChange} />
+        </div>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <Label htmlFor="latitude">Latitude</Label>
+            <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
           </div>
-          <div>
-            <Label htmlFor="title_en">Title (English)</Label>
-            <Input id="title_en" name="title_en" value={form.title_en} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="description_de">Description (German)</Label>
-            <Textarea id="description_de" name="description_de" value={form.description_de} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="description_en">Description (English)</Label>
-            <Textarea id="description_en" name="description_en" value={form.description_en} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="type">Type</Label>
-            <Select value={form.type} onValueChange={(value) => setForm((prev) => ({ ...prev, type: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                {typeOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="custom_type_name">Custom type name</Label>
-            <Input id="custom_type_name" name="custom_type_name" value={form.custom_type_name} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="special_tag">Special tag</Label>
-            <Input id="special_tag" name="special_tag" value={form.special_tag} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="location_text">Location text</Label>
-            <Input id="location_text" name="location_text" value={form.location_text} onChange={handleChange} />
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input id="latitude" name="latitude" value={form.latitude} onChange={handleChange} />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
-            </div>
+          <div className="flex-1">
+            <Label htmlFor="longitude">Longitude</Label>
+            <Input id="longitude" name="longitude" value={form.longitude} onChange={handleChange} />
           </div>
         </div>
-        <div className="space-y-4">
-          <div>
-            <Label>Image upload</Label>
-            <div className="relative">
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="image-upload" disabled={uploadingImage} />
-              <label htmlFor="image-upload" className={`border-2 border-dashed flex items-center justify-center cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:bg-gray-100 transition-colors group ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}> 
-                {(form.image_urls && form.image_urls.startsWith('http')) ? (
-                  <div className="relative w-full h-48">
-                    <img 
-                      src={form.image_urls} 
-                      alt="Preview" 
-                      className="object-cover w-full h-full rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.src = '';
-                        setImagePreview(null);
-                        setForm(prev => ({ ...prev, image_urls: '' }));
-                      }}
-                    />
-                    {!uploadingImage && (
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center pointer-events-none">
-                        <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-center p-4">
-                          <p className="font-medium">Click to change image</p>
-                          <p className="text-sm mt-1">or drag and drop</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors p-8 w-full h-48 bg-black rounded-lg">
-                    <span className="text-4xl mb-2">+</span>
-                    <span className="text-sm">Click to upload</span>
-                    <span className="text-xs mt-1">or drag and drop</span>
-                  </div>
-                )}
-                {uploadingImage && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent" />
-                  </div>
-                )}
-              </label>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" value={form.price} onChange={handleChange} type="number" min="0" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox id="plaque_allowed" name="plaque_allowed" checked={form.plaque_allowed} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allowed: !!checked }))} />
-            <Label htmlFor="plaque_allowed">Plaque allowed</Label>
-          </div>
-          <div>
-            <Label htmlFor="plaque_max_chars">Max. text length for dedication/plaque</Label>
-            <Input id="plaque_max_chars" name="plaque_max_chars" value={form.plaque_max_chars} onChange={handleChange} type="number" min="0" />
-          </div>
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select value={form.status} onValueChange={(value) => setForm((prev) => ({ ...prev, status: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="booking_url">Booking URL (optional)</Label>
-            <Input id="booking_url" name="booking_url" value={form.booking_url} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="share_url">Shareable URL (optional)</Label>
-            <Input id="share_url" name="share_url" value={form.share_url} onChange={handleChange} />
-          </div>
-          <div>
-            <Label htmlFor="map_url">Map URL (optional)</Label>
-            <Input id="map_url" name="map_url" value={form.map_url} onChange={handleChange} />
-          </div>
+        <div>
+          <Label htmlFor="price">Price</Label>
+          <Input id="price" name="price" value={form.price} onChange={handleChange} type="number" min="0" />
         </div>
-        <div className="md:col-span-2 flex gap-2 mt-8">
-          <Button type="submit" disabled={saving || uploadingImage || !form.image_urls || !form.image_urls.startsWith('http')}
-          >
-            Save
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.push("/providers")}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
+        <div className="flex items-center gap-2">
+          <Checkbox id="plaque_allowed" name="plaque_allowed" checked={form.plaque_allowed} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, plaque_allowed: !!checked }))} />
+          <Label htmlFor="plaque_allowed">Plaque allowed</Label>
         </div>
+        <div>
+          <Label htmlFor="plaque_max_chars">Max. text length for dedication/plaque</Label>
+          <Input id="plaque_max_chars" name="plaque_max_chars" value={form.plaque_max_chars} onChange={handleChange} type="number" min="0" />
+        </div>
+        <div>
+          <Label htmlFor="status">Status</Label>
+          <Select value={form.status} onValueChange={(value) => setForm((prev) => ({ ...prev, status: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="booking_url">Booking URL (optional)</Label>
+          <Input id="booking_url" name="booking_url" value={form.booking_url} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="share_url">Shareable URL (optional)</Label>
+          <Input id="share_url" name="share_url" value={form.share_url} onChange={handleChange} />
+        </div>
+        <div>
+          <Label htmlFor="map_url">Map URL (optional)</Label>
+          <Input id="map_url" name="map_url" value={form.map_url} onChange={handleChange} />
+        </div>
+        <div>
+          <Label>Images</Label>
+          <ImageUpload
+            value={form.image_urls}
+            onChange={(urls) => setForm(prev => ({ ...prev, image_urls: urls }))}
+            onRemove={(url) => setForm(prev => ({ ...prev, image_urls: prev.image_urls.filter(u => u !== url) }))}
+            folder="objects"
+          />
+        </div>
+        <Button type="submit" disabled={saving}>
+          {saving ? (
+            <>
+              <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              Saving...
+            </>
+          ) : (
+            "Save"
+          )}
+        </Button>
       </form>
+
+      {/* Confirmation dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>

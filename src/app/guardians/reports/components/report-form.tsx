@@ -238,6 +238,7 @@ export function ReportForm({ initialData, isEditing }: ReportFormProps) {
           )}
         />
 
+        {/* Image Upload Field */}
         <FormField
           control={form.control}
           name="image_urls"
@@ -248,10 +249,8 @@ export function ReportForm({ initialData, isEditing }: ReportFormProps) {
                 <ImageUpload
                   value={field.value}
                   onChange={field.onChange}
-                  onRemove={(url: string) => {
-                    field.onChange(field.value.filter((current) => current !== url));
-                  }}
-                  folder="reports"
+                  onRemove={(url) => form.setValue('image_urls', field.value.filter(image_url => image_url !== url))}
+                  folder="guardian_reports"
                 />
               </FormControl>
               <FormMessage />
