@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { createBrowserClient } from '@supabase/ssr';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Input } from '@/components/ui/input';
 import { Search, Plus } from 'lucide-react';
@@ -58,18 +58,21 @@ export default function ReportsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const debouncedSearch = useDebounce(searchQuery, 300);
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
-      const supabase = createClient();
-
       let query = supabase
         .from('guardian_reports')
         .select(`
           *,
-          guardian:guardian_id(first_name, last_name, email),
+          guardian_id,
           object:object_id(title_de)
-        `, { count: 'exact' });
+        `, { count: 'exact' as 'exact' });
 
       if (debouncedSearch) {
         query = query.or(`location_text.ilike.%${debouncedSearch}%,status_note.ilike.%${debouncedSearch}%`);
@@ -79,16 +82,29 @@ export default function ReportsPage() {
         query = query.eq('status_type', statusFilter);
       }
 
-      const { count } = await query.range(0, 0);
+      const { count, error: countError } = await query.range(0, 0);
+      if (countError) {
+        console.error('Error fetching reports count:', countError);
+      }
       setTotalCount(count || 0);
 
-      const { data } = await query
+      const { data, error: fetchError } = await query
         .order('created_at', { ascending: false })
         .range((page - 1) * rowsPerPage, page * rowsPerPage - 1);
 
+      if (fetchError) {
+        console.error('Error fetching reports data:', fetchError);
+        setReports([]);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('No reports data received.', { data, totalCount });
+      }
+
       setReports(data || []);
     } catch (error) {
-      console.error('Error fetching reports:', error);
+      console.error('Error fetching reports (general catch):', error);
       setReports([]);
     } finally {
       setLoading(false);
@@ -101,7 +117,6 @@ export default function ReportsPage() {
 
   const handleApprove = async (reportId: string) => {
     try {
-      const supabase = createClient();
       await supabase
         .from('guardian_reports')
         .update({ approved: true })

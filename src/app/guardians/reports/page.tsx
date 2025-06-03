@@ -1,4 +1,3 @@
-// src/app/guardians/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { GuardianReport } from '@/types/guardian-report';
 import { DataTable } from '@/components/ui/data-table';
-import { columns } from './reports/columns';
+import { columns } from './columns';
 
-export default function GuardiansPage() {
+export default function GuardianReportsPage() {
   const [reports, setReports] = useState<GuardianReport[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -27,10 +26,7 @@ export default function GuardiansPage() {
   const fetchReports = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/sign-in');
-        return;
-      }
+      if (!user) return;
 
       const { data, error } = await supabase
         .from('guardian_reports')
@@ -55,35 +51,27 @@ export default function GuardiansPage() {
   };
 
   return (
-    <div className="container mx-auto py-16">
-      <h1 className="text-3xl font-bold mb-4 text-primary">Guardians</h1>
-      <p className="text-lg text-muted-foreground mb-8">
-        This is the Guardians page. Park Guardians can submit reports, upload photos, and earn points for helping maintain public spaces.
-      </p>
-
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Reports
-            </CardTitle>
-            <Button onClick={() => router.push('/guardians/reports/new')}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Report
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              columns={columns}
-              data={reports}
-              loading={loading}
-              filterColumn="object_title"
-              filterPlaceholder="Filter by object name..."
-            />
-          </CardContent>
-        </Card>
+    <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Guardian Reports</h1>
+        <Button onClick={() => router.push('/guardians/reports/new')}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Report
+        </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reports List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={reports}
+            loading={loading}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
-}
+} 
