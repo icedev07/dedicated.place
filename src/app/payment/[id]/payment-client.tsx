@@ -6,6 +6,14 @@ import { loadStripe } from '@stripe/stripe-js/pure';
 import { useState } from 'react';
 import Image from 'next/image';
 import { MapPin, Edit3 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -22,10 +30,16 @@ interface Object {
 
 export default function PaymentClient({ object }: { object: Object }) {
   const [loading, setLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const handlePayment = async () => {
+  const handleInitiatePayment = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmPayment = async () => {
     try {
       setLoading(true);
+      setShowConfirmDialog(false);
       const response = await fetch('/api/create-payment-intent', {
         method: 'POST',
         headers: {
@@ -112,7 +126,7 @@ export default function PaymentClient({ object }: { object: Object }) {
 
           {/* Pay Now Button */}
           <Button 
-            onClick={handlePayment} 
+            onClick={handleInitiatePayment} 
             disabled={loading}
             className="w-full bg-green-700 hover:bg-green-800 text-white"
           >
@@ -120,6 +134,26 @@ export default function PaymentClient({ object }: { object: Object }) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Payment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to proceed with the payment for {object.title_de}?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPayment} disabled={loading}>
+              {loading ? 'Processing...' : 'Confirm Payment'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
