@@ -13,7 +13,15 @@ export default async function PaymentPage(props: PageProps) {
   
   const { data: object, error } = await supabase
     .from('objects')
-    .select('*')
+    .select(
+      `
+        *,
+        image_urls,
+        location_text,
+        plaque_allowed,
+        plaque_max_chars
+      `
+    )
     .eq('id', params.id)
     .single();
 
