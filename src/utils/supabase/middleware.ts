@@ -35,19 +35,19 @@ export async function updateSession(request: NextRequest) {
   );
 
   try {
-    // Refresh session if expired
-    const { data: { session }, error } = await supabase.auth.getSession();
+    // Get authenticated user
+    const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error) {
       throw error;
     }
 
-    if (session) {
+    if (user) {
       // Fetch and update profile data
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select()
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       if (!profileError && profile) {
