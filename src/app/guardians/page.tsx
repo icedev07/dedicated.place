@@ -27,10 +27,10 @@ export default function GuardiansPage() {
   const fetchReports = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/sign-in');
-        return;
-      }
+      // if (!user) {
+      //   router.push('/auth/sign-in');
+      //   return;
+      // }
 
       const { data, error } = await supabase
         .from('guardian_reports')
@@ -42,7 +42,7 @@ export default function GuardiansPage() {
             title_de
           )
         `)
-        .eq('guardian_id', user.id)
+        // .eq('guardian_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
