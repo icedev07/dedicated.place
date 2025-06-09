@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { toast } from 'sonner';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -74,26 +75,26 @@ function CheckoutForm({ object, clientSecret }: { object: Object, clientSecret: 
       const { error } = await stripe!.confirmPayment({
         elements: elements!,
         confirmParams: {
-          return_url: paymentSuccessUrl,
+          return_url: window.location.href,
         },
       });
 
       if (error) {
         if (error.type === "card_error" || error.type === "validation_error") {
           setPaymentError(error.message || "An unexpected error occurred.");
-          window.alert(`Payment failed: ${error.message || "An unexpected error occurred."}`);
+          toast.error(`Payment failed: ${error.message || "An unexpected error occurred."}`);
         } else {
           setPaymentError("An unexpected error occurred.");
-          window.alert("Payment failed: An unexpected error occurred.");
+          toast.error("Payment failed: An unexpected error occurred.");
         }
       } else {
         // Payment successful (or pending, if return_url handles it)
-        window.alert("Payment successful!");
+        toast.success("Payment successful!");
       }
     } catch (error) {
       console.error('Payment failed:', error);
       setPaymentError("An unexpected error occurred during payment.");
-      window.alert("Payment failed: An unexpected error occurred during payment.");
+      toast.error("Payment failed: An unexpected error occurred during payment.");
     } finally {
       setLoading(false);
     }
@@ -141,6 +142,10 @@ export default function PaymentClient({ object }: { object: Object }) {
   const [loading, setLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    toast.info("PaymentClient loaded.");
+  }, []);
 
   const handleInitiatePayment = async () => {
     setLoading(true);

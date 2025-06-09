@@ -33,39 +33,39 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [profiles, setProfiles] = useState<Profile[]>([]);
 
   const getCurrentUser = useCallback(async () => {
-    try {
-      console.log('------------- getCurrentUser: ', {});
-      setLoading(true);
-      const supabase = await createClient();
-      const {
-        data: { user: currentUser },
-        error
-      } = await supabase.auth.getUser();
+    // try {
+    //   console.log('------------- getCurrentUser: ', {});
+    //   setLoading(true);
+    //   const supabase = await createClient();
+    //   const {
+    //     data: { user: currentUser },
+    //     error
+    //   } = await supabase.auth.getUser();
 
-      if (error) throw error;
-      if (currentUser) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select()
-          .eq('id', currentUser.id)
-          .single();
+    //   if (error) throw error;
+    //   if (currentUser) {
+    //     const { data: profile, error } = await supabase
+    //       .from('profiles')
+    //       .select()
+    //       .eq('id', currentUser.id)
+    //       .single();
 
-        if (error) throw error;
+    //     if (error) throw error;
 
-        if (profile) {
-          currentUser.user_metadata['first_name'] = profile.first_name;
-          currentUser.user_metadata['last_name'] = profile.last_name;
-          currentUser.user_metadata['role'] = profile.role;
-        }
-      }
+    //     if (profile) {
+    //       currentUser.user_metadata['first_name'] = profile.first_name;
+    //       currentUser.user_metadata['last_name'] = profile.last_name;
+    //       currentUser.user_metadata['role'] = profile.role;
+    //     }
+    //   }
 
-      setUser(currentUser);
-    } catch (error) {
-      toast.error('Failed to get the current user');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    //   setUser(currentUser);
+    // } catch (error) {
+    //   toast.error('Failed to get the current user');
+    //   console.error(error);
+    // } finally {
+    //   setLoading(false);
+    // }
   }, []);
 
   const fetchProfiles = useCallback(async () => {
