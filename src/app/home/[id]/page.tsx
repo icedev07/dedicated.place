@@ -1,9 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
 import ObjectDetailClient from './object-detail-client';
 
-export default async function ObjectDetailPage({ params }: { params: { id: string } }) {
-  // Ensure params.id is awaited if necessary (for edge runtime)
-  const id = params.id;
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
   const supabase = await createClient();
   const { data: object, error } = await supabase
     .from('objects')
