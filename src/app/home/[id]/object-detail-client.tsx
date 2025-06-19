@@ -3,8 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, CreditCard, Globe, Tag, Info, Link as LinkIcon } from 'lucide-react';
+import { MapPin, CreditCard, Globe, Tag, Info, Link as LinkIcon, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 function formatSimpleValue(field: any) {
   if (typeof field === 'object' && field !== null && 'value' in field) {
@@ -17,8 +18,15 @@ function formatSimpleValue(field: any) {
 }
 
 export default function ObjectDetailClient({ object }: { object: any }) {
+  const router = useRouter();
   return (
     <div className="container mx-auto py-12 max-w-2xl">
+      <div className="mb-4">
+        <Button variant="ghost" onClick={() => router.push('/home')} className="flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Button>
+      </div>
       <Card className="mb-8 shadow-xl">
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-primary mb-2">{object.title_de || object.title_en}</CardTitle>
