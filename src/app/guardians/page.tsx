@@ -56,10 +56,13 @@ export default function GuardiansPage() {
 
   return (
     <div className="container mx-auto py-16">
-      <h1 className="text-3xl font-bold mb-4 text-primary">Guardians</h1>
-      <p className="text-lg text-muted-foreground mb-8">
-        This is the Guardians page. Park Guardians can submit reports, upload photos, and earn points for helping maintain public spaces.
-      </p>
+      <div className="mb-8 flex flex-col items-center">
+        <img src="/logo.png" alt="Logo" className="h-16 mb-4" />
+        <div className="max-w-2xl text-center">
+          <h2 className="text-2xl font-semibold mb-2">Welcome to the Guardians Page</h2>
+          <p className="text-muted-foreground">Park Guardians can submit reports, upload photos, and earn points for helping maintain public spaces. Use the table below to view and manage your reports.</p>
+        </div>
+      </div>
 
       <div className="grid gap-6">
         <Card>
