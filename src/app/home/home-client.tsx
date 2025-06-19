@@ -75,7 +75,16 @@ export default function HomeClient({ objects }: { objects: Object[] }) {
           {filteredObjects?.map((object) => (
             <Card key={object.id}>
               <CardHeader>
-                <CardTitle>{object.title_de}</CardTitle>
+                <CardTitle>
+                  <a
+                    href={`/home/${object.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-blue-600"
+                  >
+                    {object.title_de}
+                  </a>
+                </CardTitle>
                 {object.image_urls && object.image_urls.length > 0 ? (
                   <div className="relative w-full h-48 mt-2">
                     <Image
