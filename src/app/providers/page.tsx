@@ -73,6 +73,13 @@ export default function ProvidersPage() {
 
   return (
     <div className="container mx-auto py-16">
+      <div className="mb-8 flex flex-col items-center">
+        <img src="/logo.png" alt="Logo" className="h-16 mb-4" />
+        <div className="max-w-2xl text-center">
+          <h2 className="text-2xl font-semibold mb-2">Welcome to the Providers Page</h2>
+          <p className="text-muted-foreground">Here you can manage all public objects, create new ones, and search for existing objects. Use the table below to view, edit, or delete objects as needed.</p>
+        </div>
+      </div>
       <h1 className="text-3xl font-bold mb-4">Public Objects</h1>
       <div className="mb-6 flex items-center justify-between">
         <div className="relative">
