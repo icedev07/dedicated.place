@@ -34,6 +34,16 @@ export default function Header() {
         {/* Right side: Theme toggle & user */}
         <div className="flex items-center gap-4">
           <ModeToggle />
+          <Link href="/auth/sign-in">
+            <Button variant="outline" size="sm" className="font-semibold">
+              Sign In
+            </Button>
+          </Link>
+          <Link href="/auth/sign-up">
+            <Button variant="default" size="sm" className="font-semibold">
+              Sign Up
+            </Button>
+          </Link>
           <Button variant="ghost" size="icon" aria-label="User Profile">
             <UserCircle className="w-6 h-6" />
           </Button>
