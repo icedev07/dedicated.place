@@ -22,9 +22,10 @@ import { signUpAction } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { createClient } from '@/utils/supabase/client';
 
 export const metadata: Metadata = {
   title: 'Authentication',
@@ -50,7 +51,8 @@ const formSchema = z.object({
     .min(2, 'Last name must be at least 2 characters'),
   role: z.enum(['admin', 'provider', 'guardian'], {
     required_error: 'Please select a role'
-  })
+  }),
+  provider_id: z.string().optional(),
 });
 
 export type UserSignUpFormValue = z.infer<typeof formSchema>;
@@ -59,6 +61,7 @@ export default function SignUpViewPage() {
   const { getCurrentUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [providers, setProviders] = useState<{ id: string; first_name: string; last_name: string; email: string }[]>([]);
 
   const defaultValues = {
     email: '',
@@ -72,6 +75,16 @@ export default function SignUpViewPage() {
     resolver: zodResolver(formSchema),
     defaultValues
   });
+
+  useEffect(() => {
+    // Fetch providers for guardian role
+    const fetchProviders = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('profiles').select('id, first_name, last_name, email').eq('role', 'provider');
+      setProviders(data || []);
+    };
+    fetchProviders();
+  }, []);
 
   const onSubmit = async (data: UserSignUpFormValue) => {
     try {
@@ -200,42 +213,58 @@ export default function SignUpViewPage() {
                   control={form.control}
                   name='role'
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className='mb-3'>
                       <FormLabel>Role</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl className='w-full'>
-                          <SelectTrigger className='capitalize'>
-                            <SelectValue placeholder='Select a role' />
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={loading}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select role' />
                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem
-                            value={Roles.admin}
-                            className='capitalize'
-                          >
-                            {Roles.admin}
-                          </SelectItem>
-                          <SelectItem
-                            value={Roles.provider}
-                            className='capitalize'
-                          >
-                            {Roles.provider}
-                          </SelectItem>
-                          <SelectItem
-                            value={Roles.guardian}
-                            className='capitalize'
-                          >
-                            {Roles.guardian}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                          <SelectContent>
+                            <SelectItem value='admin'>Admin</SelectItem>
+                            <SelectItem value='provider'>Provider</SelectItem>
+                            <SelectItem value='guardian'>Guardian</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {form.watch('role') === 'guardian' && (
+                  <FormField
+                    control={form.control}
+                    name='provider_id'
+                    render={({ field }) => (
+                      <FormItem className='mb-3'>
+                        <FormLabel>Select Provider</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={loading}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select provider' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {providers.map((provider) => (
+                                <SelectItem key={provider.id} value={provider.id}>
+                                  {provider.first_name} {provider.last_name} ({provider.email})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <Button
                   disabled={loading}
                   className='mt-2 ml-auto w-full bg-blue-500'
