@@ -24,6 +24,7 @@ import { signUpAction } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -89,6 +90,7 @@ const formSchema = z.object({
 export type UserSignUpFormValue = z.infer<typeof formSchema>;
 
 export default function SignUpViewPage() {
+  const router = useRouter();
   const { getCurrentUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
@@ -134,6 +136,8 @@ export default function SignUpViewPage() {
       } else {
         setMessage({ type: 'success', text: result.message });
         await getCurrentUser();
+        // Navigate to home page after successful registration
+        router.push('/home');
       }
     } catch (error) {
       setMessage({ 
